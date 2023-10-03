@@ -8,16 +8,36 @@ Deno.serve(async (req: Request) => {
     secure: true,
     httpOnly: false,
   };
-  const inputUser = url.searchParams.get('user');
-  const doLogout = url.searchParams.get('logout') === 'true';
   const res = {
     status: 200,
     headers: new Headers([
       ['Content-Type', 'text/html'],
     ]),
   };
+  const isIframed = req.headers.get('Sec-Fetch-Dest') === 'iframe';
   let cookieJar = new CookieJar(req, res, cookieOptions);
-  if (doLogout || inputUser === '') {
+
+  const doLogout = url.searchParams.get('logout') === 'true';
+  if (doLogout) {
+    cookieJar.delete('user', cookieOptions);
+    res.status = 302;
+    res.headers.set('Location', url.origin);
+    return new Response('', res);
+  }
+
+  const jsCode = await Deno.readTextFile('./src/snippet.js');
+
+  if (isIframed) {
+        if (cookieJar.has('user')) {
+            return new Response(`Hello, ${cookieJar.get('user')}! <form><input type="hidden" name="logout" value="true"/><button>Logout</button></form>`, res);
+        } else {
+            return new Response(`<button id="button">Check credentials</button><p>If nothing happens, you need to login</p><script>${jsCode}</script>`, res);
+        }
+
+    }
+
+  const inputUser = url.searchParams.get('user');
+  if (inputUser === '') {
     cookieJar.delete('user', cookieOptions);
     res.status = 302;
     res.headers.set('Location', url.origin);
@@ -32,7 +52,6 @@ Deno.serve(async (req: Request) => {
   if (cookieJar.has('user') || inputUser) {
       return new Response(`Hello, ${cookieJar.get('user') || inputUser}! <form><input type="hidden" name="logout" value="true"/><button>Logout</button></form>`, res);
   } else {
-      const jsCode = await Deno.readTextFile('./src/snippet.js');
-      return new Response(`<form id="loginForm"><button id="autoBtn">autologin</button><hr /><input name="user"></intput> <button id="manualBtn">Login</button></form><script>${jsCode}</script>`, res);
+      return new Response(`<form><input name="user"></intput> <button id="button">Login</button></form><script>${jsCode}</script>`, res);
   }
 });
