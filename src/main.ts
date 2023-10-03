@@ -16,7 +16,7 @@ Deno.serve(async (req: Request) => {
       ['Content-Type', 'text/html'],
     ]),
   };
-  let cookieJar = new CookieJar(req, res);
+  let cookieJar = new CookieJar(req, res, cookieOptions);
   if (doLogout || inputUser === '') {
     cookieJar.delete('user', cookieOptions);
     res.status = 302;
