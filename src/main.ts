@@ -5,7 +5,7 @@ Deno.serve(async (req: Request) => {
   const cookieOptions = {
     maxAge: 60 * 5,
     sameSite: 'none',
-    secure: false,
+    secure: true,
     httpOnly: false,
   };
   const inputUser = url.searchParams.get('user');
@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
   if (cookieJar.has('user') || inputUser) {
       return new Response(`Hello, ${cookieJar.get('user') || inputUser}! <form><input type="hidden" name="logout" value="true"/><button>Logout</button></form>`, res);
   } else {
-      const jsCode = await Deno.readTextFile('./snippet.js');
+      const jsCode = await Deno.readTextFile('./src/snippet.js');
       return new Response(`<form id="loginForm"><button id="autoBtn">autologin</button><hr /><input name="user"></intput> <button id="manualBtn">Login</button></form><script>${jsCode}</script>`, res);
   }
 });
