@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "deploy": "deployctl deploy --project=storage-access-api-demo src/main.ts",
+    "dev": "deno run --watch --allow-read --allow-net src/main.ts"
+  }
+}
