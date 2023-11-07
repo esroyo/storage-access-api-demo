@@ -42,6 +42,9 @@ async function handleCookieAccess() {
             console.log('According to docs (point 5): https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API/Using#checking_and_requesting_storage_access');
             try {
                 await document.requestStorageAccess();
+                console.log('Could call requestStorageAccess() without user interaction, yay!');
+                // We have access to unpartitioned cookies, so let's go
+                doThingsWithCookies();
             } catch (err) {
                 console.log('However it fails:', err);
                 check.classList.remove('hide');
